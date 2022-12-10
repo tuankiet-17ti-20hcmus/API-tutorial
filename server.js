@@ -30,15 +30,40 @@ app.engine('.hbs', exphbs.engine({ extname: '.hbs', defaultLayout: "main"}));
 app.set('view engine', '.hbs');
 
 app.get('/', (reg, res) => {
-	res.render('home')
+	res.render('register')
+})
+
+app.get('/login', (reg, res) => {
+	res.render('login')
 })
 
 app.post('/', (reg, res) => {
 	res.render('home')
 })
 
-app.get('/register', (reg, res) => {
-	res.render('register')
+app.post('/api/login', async (req, res) => {
+	const { username, password } = req.body
+	const user = await User.findOne({ username }).lean()
+
+	if (!user) {
+		return res.json({ status: 'error', error: 'Invalid username/password' })
+	}
+
+	if (await bcrypt.compare(password, user.password)) {
+		// the username, password combination is successful
+
+		const token = jwt.sign(
+			{
+				id: user._id,
+				username: user.username
+			},
+			JWT_SECRET
+		)
+
+		return res.json({ status: 'ok', data: token })
+	}
+
+	res.json({ status: 'error', error: 'Wrong username or password' })
 })
 
 app.post('/register', async (req, res) => {
