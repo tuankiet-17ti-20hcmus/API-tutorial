@@ -29,12 +29,23 @@ app.use(bodyParser.json())
 app.engine('.hbs', exphbs.engine({ extname: '.hbs', defaultLayout: "main"}));
 app.set('view engine', '.hbs');
 
+app.get('/api/register', (req, res) => {
+	User.find({}, function(err, users) {
+		if(!err) res.json(users)
+		res.status(400).json({error: 'ERROR!'})
+	})
+})
+
 app.get('/', (reg, res) => {
 	res.render('register')
 })
 
 app.get('/login', (reg, res) => {
 	res.render('login')
+})
+
+app.get('/change-password', (reg, res) => {
+	res.render('change-password')
 })
 
 app.post('/', (reg, res) => {
